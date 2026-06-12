@@ -1,0 +1,18 @@
+{
+  "requestNo": "REQ-20260604-002",
+  "businessId": "BIZ-67890",
+  "systemCode": "DWF",
+  "systemName": "DWF平台",
+  "fileType": "dwg",
+  "sealCode": "VP_GZ_001",
+  "fileUrl": "http://localhost:9876/test_drawing.dwg",
+  "callbackUrl": "http://localhost:8000/api/v1/stamp/mock-callback",
+  "position": {
+    "x": 300,
+    "y": 500,
+    "w": 150,
+    "h": 150,
+    "page": 1,
+    "rotation": 15
+  }
+}

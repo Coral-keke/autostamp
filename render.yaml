@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: autostamp
+    runtime: python
+    buildCommand: |
+      pip install -r backend/requirements.txt
+      cd frontend && npm install && npm run build
+    startCommand: cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: STAMP_WEB_PASSWORD
+        sync: false
+      - key: STAMP_API_KEY
+        sync: false
+      - key: STAMP_HMAC_SECRET
+        generateValue: true
+      - key: STAMP_WEB_TOKEN_SECRET
+        generateValue: true
+      - key: STAMP_BASE_URL
+        fromService:
+          name: autostamp
+          type: web
+          property: hostport

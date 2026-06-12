@@ -1,0 +1,34 @@
+# ── Docker Compose ───────────────────────────────────────────────
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/storage:/app/backend/storage
+      - ./backend/uploads:/app/backend/uploads
+      - ./backend/output:/app/backend/output
+    environment:
+      - STAMP_HOST=0.0.0.0
+      - STAMP_PORT=8000
+    restart: unless-stopped
+
+  # Redis (for future Celery async tasks)
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+
+  # Celery worker (for large file async processing)
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.backend
+  #   command: celery -A backend.tasks worker --loglevel=info
+  #   depends_on:
+  #     - redis
+  #   volumes:
+  #     - ./backend:/app/backend
+  #   restart: unless-stopped

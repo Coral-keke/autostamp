@@ -1,0 +1,21 @@
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+
+# HTTP Client (file download + callback)
+httpx==0.27.2
+
+# PDF Engine
+PyMuPDF==1.24.10
+
+# Image Processing (seal preprocessing)
+Pillow==10.4.0
+
+# Async Task Queue (for production, currently using asyncio)
+# celery==5.4.0
+# redis==5.0.8
+
+# Configuration
+pydantic==2.9.0
+pydantic-settings==2.5.0
