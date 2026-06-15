@@ -20,7 +20,9 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       localStorage.removeItem('stamp_token')
-      window.location.reload()
+      if (window.location.pathname !== '/' && !window.location.pathname.endsWith('/login')) {
+        window.location.href = '/'
+      }
     }
     return Promise.reject(err)
   }
