@@ -28,6 +28,13 @@ api.interceptors.response.use(
   }
 )
 
+/** Batch upload seals */
+export function uploadSealsBatch(formData) {
+  return api.post('/seals/batch', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
 /** Upload a seal image */
 export function uploadSeal(formData) {
   return api.post('/seals', formData, {
