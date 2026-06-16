@@ -26,3 +26,4 @@ openpyxl==3.1.5
 # Configuration
 pydantic==2.9.0
 pydantic-settings==2.5.0
+
