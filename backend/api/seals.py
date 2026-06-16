@@ -28,7 +28,38 @@ except ImportError:
 router = APIRouter(prefix="/api/v1/seals", tags=["seals"])
 
 
-# ── Upload ──────────────────────────────────────────────────────
+# ── Internal helper: save a single seal image ──────────────────
+
+async def _save_seal(file: UploadFile, name: str, seal_code: str,
+                     seal_type: str = "OFFICIAL", description: str = "",
+                     default_width_mm: float = 40.0, default_height_mm: float = 40.0,
+                     category: str = "general") -> SealInDB:
+    ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename else ""
+    if ext not in settings.ALLOWED_SEAL_FORMATS:
+        raise HTTPException(400, f"格式不支持: .{ext}")
+    if get_seal_by_code(seal_code):
+        raise HTTPException(409, f"印章编码 '{seal_code}' 已存在")
+    contents = await file.read()
+    if len(contents) > settings.MAX_SEAL_SIZE_MB * 1024 * 1024:
+        raise HTTPException(400, f"文件超过 {settings.MAX_SEAL_SIZE_MB}MB")
+    seal_id = uuid.uuid4().hex[:12]
+    safe_name = f"{seal_id}.png"
+    img = Image.open(BytesIO(contents))
+    if img.mode != "RGBA":
+        img = img.convert("RGBA")
+    img.save(settings.SEAL_STORAGE / safe_name, "PNG")
+    seal = SealInDB(
+        id=seal_id, name=name, seal_code=seal_code,
+        seal_type=seal_type, description=description,
+        default_width_mm=default_width_mm, default_height_mm=default_height_mm,
+        category=category, filename=safe_name,
+        file_size_bytes=len(contents), original_filename=file.filename or "unknown",
+    )
+    save_seal(seal)
+    return seal
+
+
+# ── Upload (single) ────────────────────────────────────────────
 
 @router.post("", summary="上传新印章")
 async def upload_seal(
@@ -42,43 +73,37 @@ async def upload_seal(
     category: str = Form("general"),
 ):
     """Upload a seal image (PNG recommended, transparent background)."""
-    # Validate format
-    ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename else ""
-    if ext not in settings.ALLOWED_SEAL_FORMATS:
-        raise HTTPException(400, f"格式不支持: .{ext}")
-
-    # Check seal_code uniqueness
-    if get_seal_by_code(seal_code):
-        raise HTTPException(409, f"印章编码 '{seal_code}' 已存在")
-
-    # Validate size
-    contents = await file.read()
-    if len(contents) > settings.MAX_SEAL_SIZE_MB * 1024 * 1024:
-        raise HTTPException(400, f"文件超过 {settings.MAX_SEAL_SIZE_MB}MB")
-
-    # Convert to PNG with transparency
-    seal_id = uuid.uuid4().hex[:12]
-    safe_name = f"{seal_id}.png"
-    img = Image.open(BytesIO(contents))
-    if img.mode != "RGBA":
-        img = img.convert("RGBA")
-    img.save(settings.SEAL_STORAGE / safe_name, "PNG")
-
-    seal = SealInDB(
-        id=seal_id,
-        name=name,
-        seal_code=seal_code,
-        seal_type=seal_type,
-        description=description,
-        default_width_mm=default_width_mm,
-        default_height_mm=default_height_mm,
-        category=category,
-        filename=safe_name,
-        file_size_bytes=len(contents),
-        original_filename=file.filename or "unknown",
-    )
-    save_seal(seal)
+    seal = await _save_seal(file, name, seal_code, seal_type,
+                            description, default_width_mm, default_height_mm, category)
     return {"status": "ok", "seal": seal.model_dump()}
+
+
+# ── Batch Upload ───────────────────────────────────────────────
+
+@router.post("/batch", summary="批量上传印章")
+async def upload_seals_batch(
+    files: list[UploadFile] = File(..., description="多个印章图片文件"),
+):
+    """Batch upload multiple seal images. Uses filename as seal name and code."""
+    results = []
+    errors = []
+    for file in files:
+        try:
+            base_name = (file.filename or "seal").rsplit(".", 1)[0]
+            seal_code = f"AUTO_{uuid.uuid4().hex[:8].upper()}"
+            seal = await _save_seal(file, base_name, seal_code)
+            results.append(seal.model_dump())
+        except HTTPException as e:
+            errors.append({"file": file.filename, "error": e.detail})
+        except Exception as e:
+            errors.append({"file": file.filename, "error": str(e)})
+    return {
+        "status": "ok",
+        "uploaded": len(results),
+        "failed": len(errors),
+        "seals": results,
+        "errors": errors,
+    }
 
 
 # ── List ────────────────────────────────────────────────────────

@@ -20,11 +20,21 @@ api.interceptors.response.use(
   err => {
     if (err.response?.status === 401) {
       localStorage.removeItem('stamp_token')
-      window.location.reload()
+      // avoid reload loop on login page
+      if (window.location.pathname !== '/' && !window.location.pathname.endsWith('/login')) {
+        window.location.href = '/'
+      }
     }
     return Promise.reject(err)
   }
 )
+
+/** Batch upload seals */
+export function uploadSealsBatch(formData) {
+  return api.post('/seals/batch', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
 
 /** Upload a seal image */
 export function uploadSeal(formData) {
