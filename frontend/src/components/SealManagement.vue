@@ -16,7 +16,7 @@
       <div class="modal-card">
         <h3>批量上传印章</h3>
         <div class="upload-dropzone" @click="$refs.uploadInput.click()" @dragover.prevent @drop.prevent="onDropFiles">
-          <input ref="uploadInput" type="file" accept="image/png,image/jpeg" multiple hidden @change="onPickFiles" />
+          <input ref="uploadInput" type="file" accept="image/png,image/jpeg" multiple class="visually-hidden" @change="onPickFiles" />
           <template v-if="!uploadFiles.length">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <p>拖拽或点击上传多个 PNG 印章图片</p>
@@ -161,6 +161,7 @@ function formatDate(s){ if(!s) return '-'; try{ return new Date(s).toLocaleDateS
 .file-remove { border:none; background:none; color:var(--text-tertiary); cursor:pointer; font-size:14px; padding:4px; border-radius:50%; transition:all var(--fast); }
 .file-remove:hover { background:#fee2e2; color:var(--danger); }
 .batch-summary { font-size:12px; color:var(--text-secondary); margin-bottom:16px; text-align:center; }
+.visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
 .field { padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; outline:none; }
 .field:focus { border-color:var(--brand); }
 .modal-actions { display:flex; gap:10px; justify-content:flex-end; }
