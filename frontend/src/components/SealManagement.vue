@@ -117,3 +117,66 @@ async function confirmBatchUpload(){
     const data = res.data
     ElMessage.success(`成功上传 ${data.uploaded} 个印章${data.failed ? `，${data.failed} 个失败` :
 ``` (1/2)
+''}`)
+    if(data.errors.length){
+      console.warn('上传失败:', data.errors)
+    }
+    emit('refresh')
+    showUpload.value = false
+  } catch(e){
+    ElMessage.error('上传失败: ' + (e.response?.data?.detail || e.message))
+  } finally {
+    uploading.value = false
+  }
+}
+
+function formatSize(bytes){
+  if(bytes<1024) return bytes+'B'
+  if(bytes<1048576) return (bytes/1024).toFixed(1)+'KB'
+  return (bytes/1048576).toFixed(1)+'MB'
+}
+function formatDate(s){ if(!s) return '-'; try{ return new Date(s).toLocaleDateString('zh-CN') }catch{ return s.slice(0,10) } }
+</script>
+
+<style scoped>
+.seal-mgmt { padding:32px 40px; overflow-y:auto; height:100%; }
+.mgmt-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
+.mgmt-header h2 { font-size:22px; font-weight:700; color:var(--text-primary); }
+.mgmt-header p { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+.btn-upload { display:flex; align-items:center; gap:6px; padding:8px 20px; border:none; background:var(--brand); color:#fff; border-radius:var(--radius-md); font-size:13px; font-weight:600; cursor:pointer; transition:all var(--fast) var(--ease); }
+.btn-upload:hover { background:var(--brand-dark); }
+
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100; display:flex; align-items:center; justify-content:center; }
+.modal-card { background:#fff; border-radius:var(--radius-lg); padding:28px; width:440px; box-shadow:var(--shadow-xl); }
+.modal-card h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
+.upload-dropzone { border:2px dashed var(--border); border-radius:var(--radius-md); padding:32px; text-align:center; cursor:pointer; transition:all var(--fast); margin-bottom:16px; }
+.upload-dropzone:hover { border-color:var(--brand); background:#f8faff; }
+.upload-dropzone p { font-size:13px; color:var(--text-secondary); margin-top:8px; }
+.upload-dropzone span { font-size:11px; color:var(--text-tertiary); }
+
+.file-list { max-height:220px; overflow-y:auto; margin-bottom:12px; }
+.file-item { display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid var(--border-light); border-radius:var(--radius-sm); margin-bottom:6px; }
+.file-thumb { width:36px; height:36px; border-radius:4px; object-fit:contain; border:1px solid var(--border); }
+.file-info { flex:1; min-width:0; }
+.file-name { display:block; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.file-size { font-size:11px; color:var(--text-tertiary); }
+.file-remove { border:none; background:none; color:var(--text-tertiary); cursor:pointer; font-size:14px; padding:4px; border-radius:50%; transition:all var(--fast); }
+.file-remove:hover { background:#fee2e2; color:var(--danger); }
+.batch-summary { font-size:12px; color:var(--text-secondary); margin-bottom:16px; text-align:center; }
+.field { padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; outline:none; }
+.field:focus { border-color:var(--brand); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+.btn-cancel { padding:8px 20px; border:1px solid var(--border); background:#fff; border-radius:var(--radius-sm); font-size:13px; cursor:pointer; }
+.btn-confirm { padding:8px 20px; border:none; background:var(--brand); color:#fff; border-radius:var(--radius-sm); font-size:13px; font-weight:600; cursor:pointer; }
+.btn-confirm:disabled { opacity:.4; cursor:not-allowed; }
+
+.table-wrap { background:#fff; border-radius:var(--radius-md); border:1px solid var(--border); overflow:hidden; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:12px 16px; font-size:11px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); background:var(--bg-page); }
+td { padding:14px 16px; font-size:13px; border-bottom:1px solid var(--border-light); }
+td code { font-size:12px; background:var(--bg-page); padding:2px 6px; border-radius:3px; color:var(--brand); font-family:var(--font-mono); }
+.tb-thumb { width:36px; height:36px; border-radius:4px; object-fit:contain; border:1px solid var(--border); }
+.tb-del { padding:4px 12px; border:1px solid #fecaca; background:#fef2f2; color:var(--danger); border-radius:var(--radius-sm); font-size:11px; cursor:pointer; transition:all var(--fast); }
+.tb-del:hover { background:#fee2e2; }
+.empty-row { text-align:center; color:var(--text-tertiary); padding:48px 0; }
+</style>
