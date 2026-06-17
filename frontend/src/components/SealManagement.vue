@@ -15,14 +15,14 @@
     <div class="modal-overlay" v-if="showUpload" @click.self="showUpload=false">
       <div class="modal-card">
         <h3>批量上传印章</h3>
-        <div class="upload-dropzone" @click="$refs.uploadInput.click()" @dragover.prevent @drop.prevent="onDropFiles">
-          <input ref="uploadInput" type="file" accept="image/png,image/jpeg" multiple class="visually-hidden" @change="onPickFiles" />
+        <label class="upload-dropzone" @dragover.prevent @drop.prevent="onDropFiles">
+          <input type="file" accept="image/png,image/jpeg" multiple class="visually-hidden" @change="onPickFiles" />
           <template v-if="!uploadFiles.length">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <p>拖拽或点击上传多个 PNG 印章图片</p>
             <span>建议透明背景，500×500px · 支持批量选择</span>
           </template>
-        </div>
+        </label>
         <!-- File list -->
         <div class="file-list" v-if="uploadFiles.length">
           <div class="file-item" v-for="(f, idx) in uploadFiles" :key="idx">
